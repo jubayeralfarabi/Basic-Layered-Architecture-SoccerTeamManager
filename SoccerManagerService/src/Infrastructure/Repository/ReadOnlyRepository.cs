@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -83,6 +85,16 @@ namespace Soccer.Infrastructure.Repository.RDBRepository
             where TEntity : class
         {
             return await GetQueryable<TEntity>(filter, orderBy, includeProperties, skip, take).ToListAsync();
+        }
+
+        public IEnumerable<T> SqlRawQuery<T>(string sql, params object[] parameters) where T : class
+        {
+            var p = new DynamicParameters();
+            //p.Add("@key", value);
+            using (IDbConnection db = this.context.Database.GetDbConnection())
+            {
+                return db.Query<T>(sql);
+            }
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿namespace Soccer.Platform.Infrastructure.Extensions
 {
     using System;
+    using Framework.Core;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Soccer.Infrastructure;
     using Soccer.Infrastructure.Repository.RDBRepository;
     using Soccer.Infrastructure.Repository.RDBRepository.DbContexts;
     using Soccer.Platform.Infrastructure.Core;
@@ -22,6 +24,7 @@
 
             services.AddScoped<IReadWriteRepository, ReadWriteRepository<DbContext>>();
             services.AddScoped<IReadOnlyRepository, ReadOnlyRepository<DbContext>>();
+            services.AddScoped<ISecurityContext, SecurityContext>();
 
             services.AddScoped<DbContext, SoccerDbContext>();
         }

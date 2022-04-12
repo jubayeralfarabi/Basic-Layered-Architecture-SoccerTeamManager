@@ -5,6 +5,5 @@
     public class ConfirmTransferCommand : Command
     {
         public int TransferId { get; set; }
-        public int UserId { get; set; }
     }
 }

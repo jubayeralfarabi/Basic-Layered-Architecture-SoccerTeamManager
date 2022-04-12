@@ -6,32 +6,36 @@ namespace Soccer.APIService.Controllers
     using Soccer.Application.Commands;
     using Soccer.Platform.Infrastructure.Core;
     using Soccer.Platform.Infrastructure.Core.Commands;
+    using Services.Abstractions;
+    using Framework.Core;
     using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("[controller]/[action]")]
-    [AllowAnonymous]
-    public class UserController : ControllerBase
+    [Authorize]
+    public class TeamController : ControllerBase
     {
-        private readonly ILogger<UserController> logger;
+        private readonly ITeamService teamService;
+        private readonly ISecurityContext securityContext;
         private readonly IDispatcher dispatcher;
 
-        public UserController(ILogger<UserController> logger, IDispatcher dispatcher)
+        public TeamController(ITeamService teamService, IDispatcher dispatcher, ISecurityContext securityContext)
         {
-            this.logger = logger;
+            this.teamService = teamService;
             this.dispatcher = dispatcher;
+            this.securityContext = securityContext;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserCommand command)
+        public async Task<IActionResult> UpdateTeam([FromBody] UpdateTeamCommand command)
         {
             return CheckResponse(await this.dispatcher.SendAsync(command));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> LoginUser([FromBody] LoginUserCommand command)
+        [HttpGet]
+        public async Task<IActionResult> GetMyTeam()
         {
-            return CheckResponse(await this.dispatcher.SendAsync(command));
+            return CheckResponse(await this.teamService.GetMyTeam(this.securityContext.UserContext.UserId));
         }
 
         private IActionResult CheckResponse(CommandResponse response)
@@ -42,12 +46,6 @@ namespace Soccer.APIService.Controllers
             }
 
             return Ok(response);
-        }
-
-        [HttpGet]
-        public string Ping()
-        {
-            return "Server is running";
         }
     }
 }

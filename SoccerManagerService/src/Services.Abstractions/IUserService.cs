@@ -5,5 +5,6 @@ namespace Services.Abstractions
     public interface IUserService
     {
         public Task<CommandResponse> CreateUser(string Email, string FirstName, string LastName, string Password);
+        public Task<CommandResponse> LoginUser(string Email, string Password);
     }
 }

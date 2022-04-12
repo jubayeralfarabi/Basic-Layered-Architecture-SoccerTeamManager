@@ -1,7 +1,9 @@
-﻿using Services.Abstractions;
+﻿using Framework.Core;
+using Services.Abstractions;
 using Soccer.Domain.Entities;
 using Soccer.Infrastructure.Repository.RDBRepository;
 using Soccer.Platform.Infrastructure.Core.Commands;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,11 +14,13 @@ namespace Services
     {
         private readonly IReadWriteRepository readWriteRepository;
         private readonly ITeamService teamService;
+        private readonly ISecurityContext securityContext;
 
-        public UserService(IReadWriteRepository readWriteRepository, ITeamService teamService)
+        public UserService(IReadWriteRepository readWriteRepository, ITeamService teamService, ISecurityContext securityContext)
         {
             this.readWriteRepository = readWriteRepository;
             this.teamService = teamService;
+            this.securityContext = securityContext;
         }
 
         public async Task<CommandResponse> CreateUser(string Email, string FirstName, string LastName, string Password)
@@ -34,6 +38,32 @@ namespace Services
             return new CommandResponse();
         }
 
+        public async Task<CommandResponse> LoginUser(string Email, string Password)
+        {
+            Users user = (await this.readWriteRepository.GetAsync<Users>(u => u.Email == Email)).FirstOrDefault();
+
+            var response = new CommandResponse();
+
+            if (user == null)
+            {
+                response.ValidationResult.AddError("Invalid email");
+                return response;
+            }
+            if (user.Password != this.ComputeSHA256Hash(Password)) response.ValidationResult.AddError("Invalid password");
+
+            if (!response.ValidationResult.IsValid) return response;
+
+            user.Team = (await this.teamService.GetMyTeam(user.Id)).Result as Teams;
+
+            response.Result = new 
+            {
+                AccessToken = this.securityContext.GenerateJSONWebToken(user.Id, user.Email, user.FirstName, user.LastName),
+                User = user,
+            };
+
+            return response;
+        }
+
         private async Task<CommandResponse> ValidateCreateUser(Users user)
         {
             var result = new CommandResponse();
@@ -41,7 +71,7 @@ namespace Services
             var users = await this.readWriteRepository.GetAsync<Users>(u => u.Email == user.Email);
             if(users.Any()) result.ValidationResult.AddError("Invalid email. User already exists");
 
-            if (string.IsNullOrEmpty(user.Email)) result.ValidationResult.AddError("Invalid email");
+            if (!new EmailAddressAttribute().IsValid(user.Email)) result.ValidationResult.AddError("Invalid email");
             if (string.IsNullOrEmpty(user.Password)) result.ValidationResult.AddError("Invalid password");
             if (string.IsNullOrEmpty(user.FirstName)) result.ValidationResult.AddError("Invalid firstname");
             if (string.IsNullOrEmpty(user.LastName)) result.ValidationResult.AddError("Invalid lastname");

@@ -10,26 +10,20 @@ namespace Soccer.APIService.Controllers
 
     [ApiController]
     [Route("[controller]/[action]")]
-    [AllowAnonymous]
-    public class UserController : ControllerBase
+    [Authorize]
+    public class PlayerController : ControllerBase
     {
-        private readonly ILogger<UserController> logger;
+        private readonly ILogger<PlayerController> logger;
         private readonly IDispatcher dispatcher;
 
-        public UserController(ILogger<UserController> logger, IDispatcher dispatcher)
+        public PlayerController(ILogger<PlayerController> logger, IDispatcher dispatcher)
         {
             this.logger = logger;
             this.dispatcher = dispatcher;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserCommand command)
-        {
-            return CheckResponse(await this.dispatcher.SendAsync(command));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> LoginUser([FromBody] LoginUserCommand command)
+        public async Task<IActionResult> UpdatePlayer([FromBody] UpdatePlayerCommand command)
         {
             return CheckResponse(await this.dispatcher.SendAsync(command));
         }
@@ -42,12 +36,6 @@ namespace Soccer.APIService.Controllers
             }
 
             return Ok(response);
-        }
-
-        [HttpGet]
-        public string Ping()
-        {
-            return "Server is running";
         }
     }
 }

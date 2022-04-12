@@ -1,5 +1,6 @@
 ﻿using Services.Abstractions;
 using Soccer.Domain.Entities;
+using Soccer.Infrastructure.Repository.RDBRepository;
 using Soccer.Models.Constants;
 using Soccer.Platform.Infrastructure.Core.Commands;
 
@@ -7,6 +8,13 @@ namespace Services
 {
     public class PlayerService : IPlayerService
     {
+        private readonly IReadWriteRepository readWriteRepository;
+
+        public PlayerService(IReadWriteRepository readWriteRepository) 
+        { 
+            this.readWriteRepository = readWriteRepository;
+        }
+
         public Players[] GeneratePlayersForTeam()
         {
             var players = new Players[] { };
@@ -19,9 +27,26 @@ namespace Services
             return players;
         }
 
-        public CommandResponse UpdateTeam(Teams team)
+        public async Task<CommandResponse> UpdatePlayer(int playerId, string firstName, string lastName, string country, int userId)
         {
-            throw new NotImplementedException();
+            var team = (await this.readWriteRepository.GetAsync<Teams>(t => t.UsersId == userId)).FirstOrDefault();
+            var player = this.readWriteRepository.GetById<Players>(playerId);
+
+            var response = new CommandResponse();
+
+            if (player == null || player.TeamsId != team.Id)
+            {
+                response.ValidationResult.AddError("Invalid player id or you don't have permission to update this player");
+                return response;
+            }
+
+            if (!string.IsNullOrEmpty(firstName)) player.FirstName = firstName;
+            if (!string.IsNullOrEmpty(lastName)) player.LastName = lastName;
+            if (!string.IsNullOrEmpty(country)) player.Country = country;
+
+            this.readWriteRepository.Update<Players>(player);
+
+            return response;
         }
 
         private Players GetNewPlayer(PlayerPositionsEnum position)

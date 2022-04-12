@@ -5,7 +5,8 @@ namespace Services.Abstractions
 {
     public interface ITransferService
     {
-        public CommandResponse CreateTransfer(double askingPrice, int playerId, int fromTeamId);
+        public Task<CommandResponse> CreateTransfer(double askingPrice, int playerId, int userId);
         public Task<CommandResponse> ConfirmTransfer(int transferId, int userId);
+        public CommandResponse GetAllActiveTransfers();
     }
 }

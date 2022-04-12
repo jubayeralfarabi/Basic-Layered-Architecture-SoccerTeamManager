@@ -1,5 +1,6 @@
 ﻿using Services.Abstractions;
 using Soccer.Domain.Entities;
+using Soccer.Infrastructure.Repository.RDBRepository;
 using Soccer.Platform.Infrastructure.Core.Commands;
 
 namespace Services
@@ -7,10 +8,14 @@ namespace Services
     public class TeamService : ITeamService
     {
         private readonly IPlayerService playerService;
-        public TeamService(IPlayerService playerService)
+        private readonly IReadWriteRepository readWriteRepository;
+
+        public TeamService(IPlayerService playerService, IReadWriteRepository readWriteRepository)
         {
             this.playerService = playerService;
+            this.readWriteRepository = readWriteRepository;
         }
+
         public Teams GetNewTeam(Users user)
         {
             var team = new Teams()
@@ -24,9 +29,27 @@ namespace Services
             return team;
         }
 
-        public CommandResponse UpdateTeam(Teams team)
+        public async Task<CommandResponse> UpdateTeam(string name, string country, int userId)
         {
-            throw new NotImplementedException();
+            var team = (await this.readWriteRepository.GetAsync<Teams>(t => t.UsersId == userId)).FirstOrDefault();
+
+            if(!string.IsNullOrEmpty(name)) team.Name = name;
+            if(!string.IsNullOrEmpty(country)) team.Country = country;
+
+            this.readWriteRepository.Update<Teams>(team);
+
+            return new CommandResponse();
+        }
+
+        public async Task<CommandResponse> GetMyTeam(int userId)
+        {
+            var team = (await this.readWriteRepository.GetAsync<Teams>(t => t.UsersId == userId)).FirstOrDefault();
+            team.Players = (await this.readWriteRepository.GetAsync<Players>(t => t.TeamsId == team.Id)).ToList();
+
+            return new CommandResponse()
+            {
+                Result = team,
+            };
         }
     }
 }

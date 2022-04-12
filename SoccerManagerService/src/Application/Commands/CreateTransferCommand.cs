@@ -6,6 +6,5 @@
     {
         public double AskingPrice { get; set; }
         public int PlayerId { get; set; }
-        public int FromTeamId { get; set; }
     }
 }

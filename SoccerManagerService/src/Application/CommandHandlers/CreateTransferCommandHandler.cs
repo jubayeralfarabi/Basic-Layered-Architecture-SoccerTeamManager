@@ -1,6 +1,7 @@
 ﻿namespace Soccer.Application.CommandHandlers
 {
     using System.Threading.Tasks;
+    using Framework.Core;
     using Microsoft.Extensions.Logging;
     using Services.Abstractions;
     using Soccer.Application.Commands;
@@ -10,17 +11,19 @@
     {
         private ILogger<CreateTransferCommandHandler> logger;
         private ITransferService transferService;
+        private ISecurityContext securityContext;
 
         public CreateTransferCommandHandler(
-            ILogger<CreateTransferCommandHandler> logger, ITransferService transferService)
+            ILogger<CreateTransferCommandHandler> logger, ITransferService transferService, ISecurityContext securityContext)
         {
             this.logger = logger;
             this.transferService = transferService;
+            this.securityContext = securityContext;
         }
 
         public async Task<CommandResponse> HandleAsync(CreateTransferCommand command)
         {
-            return this.transferService.CreateTransfer(command.AskingPrice, command.PlayerId, command.FromTeamId);
+            return await this.transferService.CreateTransfer(command.AskingPrice, command.PlayerId, securityContext.UserContext.UserId);
         }
     }
 }

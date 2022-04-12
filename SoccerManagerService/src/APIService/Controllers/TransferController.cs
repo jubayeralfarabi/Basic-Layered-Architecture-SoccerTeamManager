@@ -6,17 +6,20 @@ namespace Soccer.APIService.Controllers
     using Soccer.Application.Commands;
     using Soccer.Platform.Infrastructure.Core;
     using Soccer.Platform.Infrastructure.Core.Commands;
+    using Services.Abstractions;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("[controller]/[action]")]
+    [Authorize]
     public class TransferController : ControllerBase
     {
-        private readonly ILogger<UserController> logger;
+        private readonly ITransferService transferService;
         private readonly IDispatcher dispatcher;
 
-        public TransferController(ILogger<UserController> logger, IDispatcher dispatcher)
+        public TransferController(ILogger<TransferController> logger, IDispatcher dispatcher, ITransferService transferService)
         {
-            this.logger = logger;
+            this.transferService = transferService;
             this.dispatcher = dispatcher;
         }
 
@@ -30,6 +33,12 @@ namespace Soccer.APIService.Controllers
         public async Task<IActionResult> ConfirmTransfer([FromBody] ConfirmTransferCommand command)
         {
             return CheckResponse(await this.dispatcher.SendAsync(command));
+        }
+
+        [HttpGet]
+        public IActionResult GetActiveTransfers()
+        {
+            return CheckResponse(this.transferService.GetAllActiveTransfers());
         }
 
         private IActionResult CheckResponse(CommandResponse response)

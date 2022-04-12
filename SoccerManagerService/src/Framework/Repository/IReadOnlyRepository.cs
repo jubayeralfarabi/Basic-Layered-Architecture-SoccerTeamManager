@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Soccer.Infrastructure.Repository.RDBRepository
 {
@@ -25,5 +21,8 @@ namespace Soccer.Infrastructure.Repository.RDBRepository
             int? skip = null,
             int? take = null)
             where TEntity : class;
+
+        IEnumerable<T> SqlRawQuery<T>(string sql, params object[] parameters) 
+            where T : class;
     }
 }
