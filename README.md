@@ -5,4 +5,4 @@ JWT based authentication and authorization implemented here with User registrati
 Development Duration: 20 hours
 
 ### Project Reference Diagram and All Layers And Tiers
-<img src="https://user-images.githubusercontent.com/62177256/163113400-1c75b893-2d67-4f96-9313-51edd93f211d.png" width="650">
+<img src="https://user-images.githubusercontent.com/62177256/163129297-7958fdd9-3e7c-44a1-bf04-0715dc6d6a4d.png" width="650">
