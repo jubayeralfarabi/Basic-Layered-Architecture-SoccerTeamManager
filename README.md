@@ -1,5 +1,5 @@
 # Soccer Team manager
-This repo consists single service written on c# .Net 6 and it is based on 3 Tier and basic Layered Architecture for fast rapid development or demo purpose.
+This repo consists single API service written on c# .Net 6 and it is based on 3 Tier and basic Layered Architecture for fast rapid development or demo purpose.
 JWT based authentication and authorization implemented here with User registration and login feature.
 
 Development Duration: 20 hours
